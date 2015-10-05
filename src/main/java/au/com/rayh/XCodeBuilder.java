@@ -714,12 +714,7 @@ public class XCodeBuilder extends Builder {
                 launcher.launch().envs(envs).stdout(listener).pwd(projectRoot).cmds(Lists.newArrayList("rm",wrongAppSymlink.getAbsolutePath())).join();
                 
                 FilePath frameworkFolder = app.child("Frameworks");
-                List<FilePath> frameworks = frameworkFolder.list(new FileFilter() {
-
-	        		public boolean accept(File pathname) {
-	        				 return pathname.isDirectory() && pathname.getName().endsWith(".framework");
-	        			}
-                });
+                List<FilePath> frameworks = frameworkFolder.list(new FrameworkFileFilter());
                 
                 for (FilePath framework : frameworks) {
                 	File wrongFrameworkSymLink = new File(framework.absolutize().getRemote() + 
