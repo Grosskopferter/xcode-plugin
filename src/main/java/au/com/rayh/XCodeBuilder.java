@@ -45,6 +45,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.text.SimpleDateFormat;
@@ -705,6 +707,27 @@ public class XCodeBuilder extends Builder {
                 if (buildPlatform.contains("simulator")) {
                     listener.getLogger().println(Messages.XCodeBuilder_warningPackagingIPAForSimulatorSDK(sdk));
                 }
+                
+                // WEPTUN-START
+                File wrongAppSymlink = new File(app.absolutize().getRemote() + "/" + app.getBaseName() + ".app");   
+                listener.getLogger().println("Weptun: Deleting symbolic link: " + wrongAppSymlink.getAbsolutePath());
+                launcher.launch().envs(envs).stdout(listener).pwd(projectRoot).cmds(Lists.newArrayList("rm",wrongAppSymlink.getAbsolutePath())).join();
+                
+                FilePath frameworkFolder = app.child("Frameworks");
+                List<FilePath> frameworks = frameworkFolder.list(new FileFilter() {
+
+	        		public boolean accept(File pathname) {
+	        				 return pathname.isDirectory() && pathname.getName().endsWith(".framework");
+	        			}
+                });
+                
+                for (FilePath framework : frameworks) {
+                	File wrongFrameworkSymLink = new File(framework.absolutize().getRemote() + 
+                			"/" + framework.getBaseName() + ".framework");
+                	listener.getLogger().println("Weptun: Deleting symbolic framework link: " + wrongFrameworkSymLink.getAbsolutePath());
+                    launcher.launch().envs(envs).stdout(listener).pwd(projectRoot).cmds(Lists.newArrayList("rm",wrongFrameworkSymLink.getAbsolutePath())).join();	
+                }
+                // WEPTUN-END
 
                 List<String> packageCommandLine = new ArrayList<String>();
                 packageCommandLine.add(getGlobalConfiguration().getXcrunPath());
