@@ -716,11 +716,13 @@ public class XCodeBuilder extends Builder {
                 FilePath frameworkFolder = app.child("Frameworks");
                 List<FilePath> frameworks = frameworkFolder.list(new FrameworkFileFilter());
                 
-                for (FilePath framework : frameworks) {
-                	File wrongFrameworkSymLink = new File(framework.absolutize().getRemote() + 
-                			"/" + framework.getBaseName() + ".framework");
-                	listener.getLogger().println("Weptun: Deleting symbolic framework link: " + wrongFrameworkSymLink.getAbsolutePath());
-                    launcher.launch().envs(envs).stdout(listener).pwd(projectRoot).cmds(Lists.newArrayList("rm",wrongFrameworkSymLink.getAbsolutePath())).join();	
+                if (frameworks != null) {
+                	for (FilePath framework : frameworks) {
+	                	File wrongFrameworkSymLink = new File(framework.absolutize().getRemote() + 
+	                			"/" + framework.getBaseName() + ".framework");
+	                	listener.getLogger().println("Weptun: Deleting symbolic framework link: " + wrongFrameworkSymLink.getAbsolutePath());
+	                    launcher.launch().envs(envs).stdout(listener).pwd(projectRoot).cmds(Lists.newArrayList("rm",wrongFrameworkSymLink.getAbsolutePath())).join();	
+                	}
                 }
                 // WEPTUN-END
 
